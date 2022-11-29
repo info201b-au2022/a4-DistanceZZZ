@@ -1,15 +1,11 @@
-library(tidyverse)
+library(dplyr)
 
 # Data access ----
 #---------------------------------------------------------------------------#
 # This function returns the incarceration data as a dataframe
 # Note: The CSV file is stored on my local machine to speed load times
 #---------------------------------------------------------------------------#
-get_data <- function(num_records=-1) {
-  fname <- "~/Documents/info201/data/incarceration_trends.csv"
-  df <- read.csv(fname, nrows=num_records)
-  return(df)
-}
+
 
 # Processing places ----
 # NOTE: For these functions to work, the dataframe `incarceration_df` must 
@@ -101,12 +97,12 @@ states_in_region_or_division <- function(place) {
 # Do some states have no jail populations? If so, which states?
 #----------------------------------------------------------------------------#
 states_with_no_jail_pop <- function(df) {
-  t <- incarceration_df %>%
-    group_by(state) %>%
+  t <- df %>%
+    group_by(State) %>%
     summarise(p = sum(total_jail_pop, na.rm = TRUE)) %>%
     filter(p == 0) %>%
-    select(state, p) %>%
-    pull(state)
+    select(State, p) %>%
+    pull(State)
   return(t)
 }
 

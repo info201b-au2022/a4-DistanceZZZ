@@ -1,7 +1,7 @@
 ---
-title: "Your A4 Report Title (TODO: Revise title)"
-author: "Your Name"
-date: '2022-11-01'
+title: "Incarceration Report"
+author: "Alex Cao"
+date: '2022-11-21'
 output: html_document
 ---
 
@@ -10,36 +10,89 @@ source("../source/a4-helpers.R")
 source("../source/analysis.R")
 ```
 
-## Abstract 
-[TODO: Include a short abstract (about 50 words)]
+## Section 1: Introduction 
+When I am asked where would be a good place to live, I usually consider the prosperity and security of the region at the first place, and something that would directly reflect the security level of a region is its crime rate. This huge data collected by Vera would be the main source we will be studying here and we will find out how the crime rate has changed over time and what might be certain factors that influence crime rate at certain time. With the result of this study, people could have a better idea on the distribution of crime geographically or ethnically.
 
-# Test (TODO: Remove before submission!!)
-```{r echo=FALSE}
-q1_string <- test_query1()
-num <- 5
+## Section 2: Data Summary 
+Here we have a few questions:
+
+- What is the national proportion of male prisoner population out of total jail population in year 2018?
+The proportion is `r answer_1`.
+
+- What is the national crime rate in 1970 and 2018?(Crime rate is jail pop/total pop)
+The crime rate in 1970 is `r crimerate_1970`, while in 2018 crime rate is `r crimerate_2018`, which significantly increases.
+
+- Which state has the biggest jail population? 
+`r biggest_jail_pop_state` has the biggest jail population.
+
+## Section 3:
+```{r echo = FALSE}
+
+
+  data_by_year <- group_by(data, year)
+  jail_pop_by_year <- summarize(
+    data_by_year,
+    total_jail_pop = sum(total_jail_pop, na.rm = TRUE),
+  )  
+
+
+
+ ggplot(data = jail_pop_by_year) +
+    geom_col(mapping = aes(x = year, y = total_jail_pop))+
+ggtitle("Graph of Total Jail Population from 1970 to 2018.")
+
 ```
-As you know, this is a markdown report. The [R Markdown Cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf) is **useful!**
+This is a graph that shows the total jail population nationally since 1970 to 2018. As we can see there is a huge and constant increase since 1970 to 2008, and then it drops down a little bit and stay kind of constantly. My question would be why did the total jail population stop increasing at 2008?
 
-* Here's a test of a dynamic variable. Say **"`r q1_string`!!!** 
-* Here's another test. A vector
-of numbers: `r test_query2(num)`.
+## Section 5
 
-Recall that _{r echo=TRUE}_ can be used to display the code, 
-which is very useful when developing and debugging a report. Here's an example: 
+```{r echo = FALSE}
+male_female_prop <- summarize(data%>%
+  group_by(year),
+  total_male_jail_pop = sum(male_jail_pop, na.rm = TRUE),
+  total_female_jail_pop = sum(female_jail_pop, na.rm = TRUE),
+  prop_male_female = total_male_jail_pop/total_female_jail_pop
+)
 
-```{r echo=TRUE}
-num <- 5
-sum <- sum(test_query2(num))
-print(sum)
+
+ ggplot(data = male_female_prop) +
+  geom_col(mapping = aes(x = year, y = prop_male_female))+
+   ggtitle("Graph of ratio of male prisoner to female prisoner from 1970 to 2018.")
 ```
+This graph is a bar graph that shows the ratio of male prisoner to female prisoner since 1970 to 2018. As we can see in 1970 the population of male prisoner is nearly 18 times of female prisoner population. But as time goes, the ratio goes down and eventually in 2018 the ratio is about 7.2 times. A concise question is that what would be some factor that causes the decline of this ratio? 
+## Section 6
 
-## Introduction 
-[TODO]
+```{r echo = FALSE}
+jail_pop_state <- summarize(data%>%
+group_by(State),                                  
+total_pop = sum(total_jail_pop, na.rm = TRUE),
+ )
+ jail_pop_state$State = tolower(jail_pop_state$State)
+state_shape <- map_data("state")%>%
+rename(State = region) %>% 
+left_join(jail_pop_state, by="State")
 
-## Data Summary 
-[TODO]
+ggplot(state_shape) +
+  geom_polygon(
+    mapping = aes(x = long, y = lat, group = group, fill = total_pop),
+    color = "white", 
+    size = .5        
+  ) +
+  coord_map() + 
+  scale_fill_continuous(low = "#132B43", high = "Red") +
+  labs(fill = "Total Jail Population")+
+   ggtitle("Map of Total Jail Population")
 
-[TODO ... other sections ... See Canvas for details]
 
-_All the very best with your work!_
+
+
+```
+This is a map that demonstrates the jail population in different states in the U.S. The different color indicates the different level of total jail population, the more toward red meaning more population while the darker it is, the less population it is. As we can see, California, Texas and a lot of east states tend to have higher jail population. And a concise question would be that what could be a potential factor that is causing the difference between states?
+
+
+
+
+
+
+
 
